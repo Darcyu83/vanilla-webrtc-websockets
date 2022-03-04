@@ -19,31 +19,20 @@ app.get("/", (req, res) => {
 
 app.get("/*", (req, res) => res.redirect("/"));
 
-const handleListen = () => console.log("Listening on ws://localhost:3000/");
-// app.listen(3000, handleListen);
-
 // requestListener => http + wss on port 3000
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const handleConnection = (socket, req) => {
-  console.log(
-    "socket in server.js means browser just connected to server ",
-    socket
-  );
-  console.log("req", req);
-};
+const sockets = [];
 wss.on("connection", (socket) => {
-  //   console.log(
-  //     "socket in server.js means browser just connected to server ",
-  //     socket
-  //   );
-  console.log("Connected to Sever ✔");
+  sockets.push(socket);
+
   socket.on("close", () => console.log("Disconnected from browser"));
   socket.on("message", (message) =>
-    console.log("Message from browser", message.toString("utf8"))
+    sockets.map((socket) => socket.send(message))
   );
-  socket.send("Hello from server socket");
 });
 
+const handleListen = () => console.log("Listening on ws://localhost:3000/");
+// app.listen(3000, handleListen);
 server.listen(3000, handleListen);
